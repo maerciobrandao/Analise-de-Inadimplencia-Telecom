@@ -37,7 +37,7 @@ Medição do tempo médio de atraso nos pagamentos.
 
 ## 📈 Dashboard
 
-![Dashboard](dashboard.jpg)
+![Dashboard](dashboard.png)
 
 ---
 
