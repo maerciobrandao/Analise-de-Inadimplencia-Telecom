@@ -96,3 +96,64 @@ WHERE p.data_pagamento IS NULL
    OR DATEDIFF(day, p.data_vencimento, p.data_pagamento) > 10
 GROUP BY c.nome, c.tipo_cliente, ct.plano
 ORDER BY valor_total_inadimplente DESC;
+
+
+-- 8. Análise de inadimplência por UF
+SELECT
+    c.uf,
+    COUNT(*) AS qtd_inadimplentes,
+    SUM(p.valor_pago) AS valor_total_inadimplente,
+    AVG(
+        CASE
+            WHEN p.data_pagamento IS NOT NULL
+            THEN DATEDIFF(DAY, p.data_vencimento, p.data_pagamento)
+        END
+    ) AS atraso_medio
+FROM pagamentos p
+INNER JOIN contratos ct
+    ON p.contrato_id = ct.contrato_id
+INNER JOIN clientes c
+    ON ct.cliente_id = c.cliente_id
+WHERE p.data_pagamento IS NULL
+   OR DATEDIFF(DAY, p.data_vencimento, p.data_pagamento) > 10
+GROUP BY c.uf
+ORDER BY valor_total_inadimplente DESC;
+
+
+-- 9. Ranking de UFs por valor inadimplente
+SELECT
+    c.uf,
+    SUM(p.valor_pago) AS valor_total_inadimplente
+FROM pagamentos p
+INNER JOIN contratos ct
+    ON p.contrato_id = ct.contrato_id
+INNER JOIN clientes c
+    ON ct.cliente_id = c.cliente_id
+WHERE p.data_pagamento IS NULL
+   OR DATEDIFF(DAY, p.data_vencimento, p.data_pagamento) > 10
+GROUP BY c.uf
+ORDER BY valor_total_inadimplente DESC;
+
+
+-- 10. Inadimplência por UF e plano
+SELECT
+    c.uf,
+    ct.plano,
+    COUNT(*) AS qtd_inadimplentes,
+    SUM(p.valor_pago) AS valor_total_inadimplente
+FROM pagamentos p
+INNER JOIN contratos ct
+    ON p.contrato_id = ct.contrato_id
+INNER JOIN clientes c
+    ON ct.cliente_id = c.cliente_id
+WHERE p.data_pagamento IS NULL
+   OR DATEDIFF(DAY, p.data_vencimento, p.data_pagamento) > 10
+GROUP BY c.uf, ct.plano
+ORDER BY c.uf, valor_total_inadimplente DESC;
+
+
+-- 11. Conferência geral da base
+SELECT
+    (SELECT COUNT(*) FROM clientes) AS total_clientes,
+    (SELECT COUNT(*) FROM contratos) AS total_contratos,
+    (SELECT COUNT(*) FROM pagamentos) AS total_pagamentos;
